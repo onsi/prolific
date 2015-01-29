@@ -54,6 +54,12 @@ prolific "Onsi Fakhouri" stories.prolific > stories.csv
 
 The author name is used to populate the requester field on the story.  Make sure to use quotes!
 
+## Import into Tracker
+
+Use the Import CSV function to add the stories to your project with the csv file or output from prolific.
+
+[![Image](import_csv.png?raw=true)]
+
 ## Installation
 
 To install from source, make sure you have the Go toolchain installed, then:
