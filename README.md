@@ -57,14 +57,12 @@ into CSV files ready for import into Tracker.
 
 Nothing fancy here.  Just a CSV file that you manually import into tracker.
 
-## Syntax
+## Installation
 
-Stories are separated by `\n---\n\n`.  Each story is a block made up of:
+To install from source, make sure you have the Go toolchain installed, then:
+`go install github.com/onsi/prolific`
 
-- **Title**: The first line following the delimiter becomes the story title.  The story title must be on a single line.  The title is required.
-- **Story Type**(optional): The story title can be preceded by an optional `[X]` story type.  Legal values are `[FEATURE]` (the default), `[BUG]`, `[CHORE]`, and `[RELEASE]`.
-- **Description**(optional): Content immediately after the title is placed, verbatim, as the story's description.
-- **Labels**(optional): If the last line before `\n---\n\n` begins with `L:` Prolific will interpret the content following `L:` as comma-separated labels.
+Or just download the OS X binary from the GitHub releases page.
 
 ## Usage
 
@@ -80,6 +78,15 @@ Will emit a CSV version of the passed in prolific file.  You can use `>` to shov
 prolific stories.prolific > stories.csv
 ```
 
+## Syntax
+
+Stories are separated by `\n---\n\n`.  Each story is a block made up of:
+
+- **Title**: The first line following the delimiter becomes the story title.  The story title must be on a single line.  The title is required.
+- **Story Type**(optional): The story title can be preceded by an optional `[X]` story type.  Legal values are `[FEATURE]` (the default), `[BUG]`, `[CHORE]`, and `[RELEASE]`.
+- **Description**(optional): Content immediately after the title is placed, verbatim, as the story's description.
+- **Labels**(optional): If the last line before `\n---\n\n` begins with `L:` Prolific will interpret the content following `L:` as comma-separated labels.
+
 ## Import into Tracker
 
 Use the Import CSV function to add the stories to your project with the csv file or output from prolific.
@@ -88,12 +95,5 @@ Use the Import CSV function to add the stories to your project with the csv file
 
 The requester associated with the resulting stories will be the account used to import the csv file.
 
-## Installation
-
-To install from source, make sure you have the Go toolchain installed, then:
-`go install github.com/onsi/prolific`
-
-Or just download the OS X binary from the GitHub releases page.
-
 ## License
-Prolific is MIT Licenses
+Prolific is MIT Licensed
