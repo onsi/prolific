@@ -11,7 +11,11 @@ import (
 )
 
 func main() {
-	if len(os.Args) == 1 {
+	if len(os.Args) != 2 {
+		PrintUsageAndExit()
+	}
+
+	if os.Args[1] == "help" {
 		PrintUsageAndExit()
 	}
 
@@ -25,17 +29,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	if len(os.Args) != 3 {
-		PrintUsageAndExit()
-	}
-
-	author := os.Args[1]
-	storyFile := os.Args[2]
-
-	fmt.Fprintf(os.Stderr, "Converting %s\n", storyFile)
-	fmt.Fprintf(os.Stderr, "Author will be %s\n", author)
-
-	err := ConvertAndEmitStories(author, storyFile)
+	fmt.Fprintf(os.Stderr, "Converting %s\n", os.Args[1])
+	err := ConvertAndEmitStories(os.Args[1])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed:", err.Error())
 		os.Exit(1)

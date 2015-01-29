@@ -32,11 +32,39 @@ As a user I can clean my bagel toaster
 I should be able to pull out a tray and clean up the crumbs.
 
 L: mvp, clean-up
+
+---
+
+[BUG] Every third time I use it, the toaster jams
+
+L: mvp
+
+---
+
+[CHORE] Reticulate the Toaster's turboencabulator
+
+A metabolic endocrinide that the developrs will likely need to photoencapsulate.
+
+---
+
+[RELEASE] Toaster MVP is Ready
+
+L: mvp
+
 ```
 
-into CSV files ready for import into Tracker.  The first line becomes the story title, subsequent lines become content for the description, and the comma separated list after L: gets turned into labels.
+into CSV files ready for import into Tracker. 
 
 Nothing fancy here.  Just a CSV file that you manually import into tracker.
+
+## Syntax
+
+Stories are separated by `\n---\n\n`.  Each story is a block made up of:
+
+- **Title**: The first line following the delimiter becomes the story title.  The story title must be on a single line.  The title is required.
+- **Story Type**(optional): The story title can be preceded by an optional `[X]` story type.  Legal values are `[FEATURE]` (the default), `[BUG]`, `[CHORE]`, and `[RELEASE]`.
+- **Description**(optional): Content immediately after the title is placed, verbatim, as the story's description.
+- **Labels**(optional): If the last line before `\n---\n\n` begins with `L:` Prolific will interpret the content following `L:` as comma-separated labels.
 
 ## Usage
 
@@ -44,21 +72,21 @@ Nothing fancy here.  Just a CSV file that you manually import into tracker.
 
 Will generate a template `stories.prolific` file
 
-#### `prolific "Author Name" "path/to/stories.prolific"`
+#### `prolific path/to/stories.prolific`
 
 Will emit a CSV version of the passed in prolific file.  You can use `>` to shovel this content into a file.  For example:
 
 ```
-prolific "Onsi Fakhouri" stories.prolific > stories.csv
+prolific stories.prolific > stories.csv
 ```
-
-The author name is used to populate the requester field on the story.  Make sure to use quotes!
 
 ## Import into Tracker
 
 Use the Import CSV function to add the stories to your project with the csv file or output from prolific.
 
-[![Image](import_csv.png?raw=true)]
+![Image](import_csv.png?raw=true)
+
+The requester associated with the resulting stories will be the account used to import the csv file.
 
 ## Installation
 

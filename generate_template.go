@@ -28,7 +28,25 @@ As a user I can clean my bagel toaster
 
 I should be able to pull out a tray and clean up the crumbs.
 
-L: mvp, clean-up`
+L: mvp, clean-up
+
+---
+
+[BUG] Every third time I use it, the toaster jams
+
+L: mvp
+
+---
+
+[CHORE] Reticulate the Toaster's turboencabulator
+
+A metabolic endocrinide that the developrs will likely need to photoencapsulate.
+
+---
+
+[RELEASE] Toaster MVP is Ready
+
+L: mvp`
 
 func GenerateTemplate() error {
 	return ioutil.WriteFile("stories.prolific", []byte(template), 0666)

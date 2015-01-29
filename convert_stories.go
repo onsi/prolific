@@ -7,16 +7,22 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 )
 
-func ConvertAndEmitStories(author string, file string) error {
+func ConvertAndEmitStories(file string) error {
 	content, err := ioutil.ReadFile(file)
 	if err != nil {
 		return fmt.Errorf("Couldn't load file: %s\n%s", file, err.Error())
 	}
 
-	stories := ExtractStories(content, author)
+	stories, errors := ExtractStories(content)
+
+	if len(errors) > 0 {
+		fmt.Fprintln(os.Stderr, "There were errors parsing your file:")
+		for _, err := range errors {
+			fmt.Fprintln(os.Stderr, "- "+err.Error())
+		}
+	}
 
 	w := csv.NewWriter(os.Stdout)
 
@@ -27,86 +33,46 @@ func ConvertAndEmitStories(author string, file string) error {
 	}
 
 	w.Flush()
+
 	return nil
 }
 
-var CSV_HEADERS = []string{
-	"Requested By",
-	"Title",
-	"Description",
-	"Labels",
-}
+var EmptyStoryError = errors.New("You have an empty story.")
 
-type Story struct {
-	Author  string
-	Title   string
-	Content string
-	Labels  []string
-}
+func ExtractStories(content []byte) ([]Story, []error) {
+	errors := []error{}
 
-func (s *Story) AppendLine(line string) {
-	if s.Title == "" {
-		if line == "" {
-			return
-		}
-		s.Title = line
-		return
-	}
-
-	if strings.HasPrefix(line, "L: ") {
-		labels := strings.Split(strings.TrimPrefix(line, "L: "), ",")
-		for i := range labels {
-			labels[i] = strings.TrimSpace(labels[i])
-		}
-		s.Labels = labels
-		return
-	}
-
-	s.Content += line + "\n"
-}
-
-func (s *Story) FinalizeContents() {
-	s.Content = strings.TrimSpace(s.Content)
-}
-
-func (s Story) CSVRecords() []string {
-	return []string{
-		s.Author,
-		s.Title,
-		s.Content,
-		strings.Join(s.Labels, ","),
-	}
-}
-
-func ExtractStories(content []byte, author string) []Story {
 	parts := bytes.Split(content, []byte("\n---\n\n"))
+
 	stories := []Story{}
 	for _, part := range parts {
-		story, err := ExtractStory(part, author)
+		story, err := ExtractStory(part)
 		if err != nil {
+			if err != EmptyStoryError {
+				errors = append(errors, err)
+			}
 			continue
 		}
 		stories = append(stories, story)
 	}
 
-	return stories
+	return stories, errors
 }
 
-func ExtractStory(part []byte, author string) (Story, error) {
+func ExtractStory(part []byte) (Story, error) {
 	lines := bytes.Split(part, []byte("\n"))
 	if len(lines) == 0 {
-		return Story{}, errors.New("empty story")
+		return Story{}, EmptyStoryError
 	}
 
-	story := &Story{
-		Author: author,
-	}
+	story := &Story{}
 
 	for _, line := range lines {
-		story.AppendLine(string(line))
+		err := story.AppendLine(string(line))
+		if err != nil {
+			return Story{}, err
+		}
 	}
-
-	story.FinalizeContents()
 
 	return *story, nil
 }
