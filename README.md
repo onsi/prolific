@@ -55,8 +55,6 @@ L: mvp
 
 into CSV files ready for import into Tracker. 
 
-Nothing fancy here.  Just a CSV file that you manually import into tracker.
-
 ## Installation
 
 To install from source, make sure you have the Go toolchain installed, then:
