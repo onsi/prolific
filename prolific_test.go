@@ -7,6 +7,7 @@ import (
 	"os/exec"
 
 	"github.com/onsi/gomega/gexec"
+	"github.com/onsi/gomega/gbytes"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,6 +19,28 @@ var _ = Describe("Prolific", func() {
 
 	AfterEach(func() {
 		os.Remove("stories.prolific")
+	})
+
+	Describe("prolific help", func() {
+		Context("given a 'help' argument", func() {
+			It("emits usage information", func() {
+				cmd := exec.Command(prolific, "help")
+				session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Ω(err).ShouldNot(HaveOccurred())
+				Eventually(session).Should(gexec.Exit(1))
+				Ω(session.Out).Should(gbytes.Say("Usage:"))
+			})
+		})
+
+		Context("given no argument", func() {
+			It("emits usage information", func() {
+				cmd := exec.Command(prolific)
+				session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Ω(err).ShouldNot(HaveOccurred())
+				Eventually(session).Should(gexec.Exit(1))
+				Ω(session.Out).Should(gbytes.Say("Usage:"))
+			})
+		})
 	})
 
 	Describe("prolific template", func() {
