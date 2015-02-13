@@ -30,7 +30,7 @@ func main() {
 	}
 
 	fmt.Fprintf(os.Stderr, "Converting %s\n", os.Args[1])
-	err := ConvertAndEmitStories(os.Args[1])
+	err := ConvertAndEmitStoriesFromFile(os.Args[1])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed:", err.Error())
 		os.Exit(1)
