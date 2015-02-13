@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"os"
 	"os/exec"
+	"io/ioutil"
 
 	"github.com/onsi/gomega/gexec"
 	"github.com/onsi/gomega/gbytes"
@@ -105,6 +106,38 @@ var _ = Describe("Prolific", func() {
 				Ω(records[3][LABELS]).Should(Equal("mvp,clean-up"))
 				Ω(records[5][LABELS]).Should(BeEmpty())
 				Ω(records[6][LABELS]).Should(Equal("mvp"))
+			})
+		})
+
+		Describe("reading from stdin", func() {
+			BeforeEach(func() {
+				cmd := exec.Command(prolific)
+				stdin, err := cmd.StdinPipe()
+				Ω(err).ShouldNot(HaveOccurred())
+
+				prolific_content, err := ioutil.ReadFile("stories.prolific")
+				Ω(err).ShouldNot(HaveOccurred())
+				_, err = stdin.Write(prolific_content)
+				Ω(err).ShouldNot(HaveOccurred())
+
+				session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Ω(err).ShouldNot(HaveOccurred())
+
+				err = stdin.Close()
+				Ω(err).ShouldNot(HaveOccurred())
+				Eventually(session).Should(gexec.Exit(0))
+			})
+
+			It("should convert the passed-in prolific content", func() {
+				reader := csv.NewReader(bytes.NewReader(session.Out.Contents()))
+				records, err := reader.ReadAll()
+				Ω(err).ShouldNot(HaveOccurred())
+
+				By("emitting a header line")
+				Ω(records[0]).Should(Equal([]string{"Title", "Type", "Description", "Labels"}))
+
+				By("parsing all entries")
+				Ω(records).Should(HaveLen(7))
 			})
 		})
 	})
