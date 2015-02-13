@@ -53,7 +53,7 @@ L: mvp
 
 ```
 
-into CSV files ready for import into Tracker. 
+into CSV files ready for import into Tracker.
 
 ## Installation
 
@@ -64,7 +64,7 @@ Or just download the OS X binary from the GitHub releases page.
 
 ## Usage
 
-#### `prolific template`  
+#### `prolific template`
 
 Will generate a template `stories.prolific` file
 
@@ -74,6 +74,14 @@ Will emit a CSV version of the passed in prolific file.  You can use `>` to shov
 
 ```
 prolific stories.prolific > stories.csv
+```
+
+#### `STDIN`
+
+Prolific will also read content from standard input, which can be useful when combined with templates. For example:
+
+```
+erb stories.prolific.erb | prolific > stories.csv
 ```
 
 ## Syntax
