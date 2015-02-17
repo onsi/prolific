@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"os"
+    "fmt"
+    "os"
 )
 
 func PrintUsageAndExit() {
-	fmt.Println(`prolific v2.0
+    fmt.Println(`prolific v2.0
 
 Usage:
     prolific [FILE]
@@ -24,28 +24,33 @@ Usage:
 
     prolific help
         You're looking at it!
-	
+
 Syntax:
     Stories are separated by the delimiter:
 
-    ---
+        ---
 
     Each story is a block made up of:
 
-    [STORY_TYPE] TITLE
+        [STORY_TYPE] TITLE
 
-    DESCRIPTION
-    DESCRIPTION
-    DESCRIPTION
+        DESCRIPTION
+        DESCRIPTION
+        DESCRIPTION
 
-    L: LABEL 1, LABEL 2
+        - [ ] TASK 1
+        - [ ] TASK 2
+
+        L: LABEL 1, LABEL 2
 
     Of these, only TITLE is required and must be on a single line.
 
     [STORY_TYPE] may be omitted.  If present it must be one of:
-      [FEATURE]
-      [BUG]
-      [CHORE]
-      [RELEASE]`)
-	os.Exit(1)
+
+        [FEATURE]
+        [BUG]
+        [CHORE]
+        [RELEASE]
+`)
+    os.Exit(1)
 }
