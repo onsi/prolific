@@ -9,12 +9,16 @@ import (
 	"os"
 )
 
-func ConvertAndEmitStories(file string) error {
+func ConvertAndEmitStoriesFromFile(file string) error {
 	content, err := ioutil.ReadFile(file)
 	if err != nil {
 		return fmt.Errorf("Couldn't load file: %s\n%s", file, err.Error())
 	}
 
+	return ConvertAndEmitStories(content)
+}
+
+func ConvertAndEmitStories(content []byte) error {
 	stories, errors := ExtractStories(content)
 
 	if len(errors) > 0 {

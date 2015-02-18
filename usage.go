@@ -9,19 +9,21 @@ func PrintUsageAndExit() {
 	fmt.Println(`prolific v2.0
 
 Usage:
-    prolific FILE
-        converts the passed in prolific file to a CSV printed to stdout
-        the CSV can be imported manually into Pivotal Tracker
+    prolific [FILE]
+        Converts the prolific file FILE to a CSV printed to stdout.
+        If FILE is not specified, content is read from STDIN.
 
-        prolific stories.prolific > stories.csv
+        The CSV can be imported manually into Pivotal Tracker, so:
 
-        is a useful one-liner
+            prolific stories.prolific > stories.csv
+
+        is a useful one-liner.
 
     prolific template
-        generates a sample stories.prolific
+        Generates a sample 'stories.prolific'.
 
     prolific help
-        you're looking at it!
+        You're looking at it!
 	
 Syntax:
     Stories are separated by the delimiter:
