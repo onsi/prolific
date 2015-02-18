@@ -89,9 +89,10 @@ erb stories.prolific.erb | prolific > stories.csv
 Stories are separated by `\n---\n\n`.  Each story is a block made up of:
 
 - **Title**: The first line following the delimiter becomes the story title.  The story title must be on a single line.  The title is required.
-- **Story Type**(optional): The story title can be preceded by an optional `[X]` story type.  Legal values are `[FEATURE]` (the default), `[BUG]`, `[CHORE]`, and `[RELEASE]`.
-- **Description**(optional): Content immediately after the title is placed, verbatim, as the story's description.
-- **Labels**(optional): If the last line before `\n---\n\n` begins with `L:` Prolific will interpret the content following `L:` as comma-separated labels.
+- **Story Type** (optional): The story title can be preceded by an optional `[X]` story type.  Legal values are `[FEATURE]` (the default), `[BUG]`, `[CHORE]`, and `[RELEASE]`.
+- **Description** (optional): Content immediately after the title is placed, verbatim, as the story's description.
+- **Tasks** (optional): Content prefaced with `- [ ]` or `* [ ]` are converted into tasks (similar Github-flavored-Markdown checklists).
+- **Labels** (optional): If the last line before `\n---\n\n` begins with `L:` Prolific will interpret the content following `L:` as comma-separated labels.
 
 ## Import into Tracker
 

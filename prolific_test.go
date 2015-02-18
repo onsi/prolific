@@ -5,6 +5,8 @@ import (
 	"encoding/csv"
 	"os"
 	"os/exec"
+	"fmt"
+  "io"
 	"io/ioutil"
 
 	"github.com/onsi/gomega/gexec"
@@ -15,6 +17,7 @@ import (
 )
 
 var _ = Describe("Prolific", func() {
+	const max_tasks = 8
 	var session *gexec.Session
 	var err error
 
@@ -80,12 +83,12 @@ var _ = Describe("Prolific", func() {
 				Ω(err).ShouldNot(HaveOccurred())
 
 				By("emitting a header line")
-				Ω(records[0]).Should(Equal([]string{"Title", "Type", "Description", "Labels"}))
+				Ω(records[0]).Should(Equal([]string{"Title", "Type", "Description", "Labels", "Task", "Task", "Task", "Task", "Task", "Task", "Task", "Task"}))
 
 				By("parsing all entries")
 				Ω(records).Should(HaveLen(7))
 
-				var TITLE, TYPE, DESCRIPTION, LABELS = 0, 1, 2, 3
+				var TITLE, TYPE, DESCRIPTION, LABELS, TASK1 = 0, 1, 2, 3, 4
 
 				By("parsing all relevant fields")
 				Ω(records[1][TITLE]).Should(Equal("As a user I can toast a bagel"))
@@ -106,6 +109,19 @@ var _ = Describe("Prolific", func() {
 				Ω(records[3][LABELS]).Should(Equal("mvp,clean-up"))
 				Ω(records[5][LABELS]).Should(BeEmpty())
 				Ω(records[6][LABELS]).Should(Equal("mvp"))
+
+				By("handling absence of tasks correctly")
+				for j := 0 ; j < max_tasks ; j++ {
+					Ω(records[1][TASK1 + j]).Should(Equal(""))
+				}
+
+				By("handling some tasks correctly")
+				for j := 0 ; j < 3 ; j++ {
+					Ω(records[5][TASK1 + j]).Should(Equal(fmt.Sprintf("task %d", j+1)))
+				}
+				for j := 3 ; j < max_tasks ; j++ {
+					Ω(records[5][TASK1 + j]).Should(Equal(""))
+				}
 			})
 		})
 
@@ -134,10 +150,92 @@ var _ = Describe("Prolific", func() {
 				Ω(err).ShouldNot(HaveOccurred())
 
 				By("emitting a header line")
-				Ω(records[0]).Should(Equal([]string{"Title", "Type", "Description", "Labels"}))
+				Ω(records[0]).Should(Equal([]string{"Title", "Type", "Description", "Labels", "Task", "Task", "Task", "Task", "Task", "Task", "Task", "Task"}))
 
 				By("parsing all entries")
 				Ω(records).Should(HaveLen(7))
+			})
+		})
+
+		Describe("tasks", func() {
+			var cmd *exec.Cmd
+			var stdin io.WriteCloser
+
+			BeforeEach(func() {
+				cmd = exec.Command(prolific)
+				stdin, err = cmd.StdinPipe()
+				Ω(err).ShouldNot(HaveOccurred())
+			})
+
+			Context("max tasks", func() {
+				const story = `As a user I can toast a bagel
+
+When I insert a bagel into toaster and press the on button, I should get a toasted bagel
+
+- [ ] task 1
+* [ ] task 2
+- [ ] task 3
+* [ ] task 4
+- [ ] task 5
+* [ ] task 6
+- [ ] task 7
+* [ ] task 8
+`
+				It("populates all task columns", func() {
+					_, err = stdin.Write([]byte(story))
+					Ω(err).ShouldNot(HaveOccurred())
+
+					session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+					Ω(err).ShouldNot(HaveOccurred())
+
+					err = stdin.Close()
+					Ω(err).ShouldNot(HaveOccurred())
+					Eventually(session).Should(gexec.Exit(0))
+
+					reader := csv.NewReader(bytes.NewReader(session.Out.Contents()))
+					records, err := reader.ReadAll()
+					Ω(err).ShouldNot(HaveOccurred())
+
+					Ω(records[0]).Should(Equal([]string{"Title", "Type", "Description", "Labels", "Task", "Task", "Task", "Task", "Task", "Task", "Task", "Task"}))
+					Ω(records).Should(HaveLen(2))
+
+					var TASK1 = 4
+					for j := 0 ; j < 8 ; j++ {
+						Ω(records[1][TASK1 + j]).Should(Equal(fmt.Sprintf("task %d", j+1)))
+					}
+				})
+			})
+
+			Context("greater than max tasks", func() {
+				const story = `As a user I can toast a bagel
+
+When I insert a bagel into toaster and press the on button, I should get a toasted bagel
+
+- [ ] task 1
+* [ ] task 2
+- [ ] task 3
+* [ ] task 4
+- [ ] task 5
+* [ ] task 6
+- [ ] task 7
+* [ ] task 8
+* [ ] task 9
+`
+
+				It("raises an error", func() {
+					_, err = stdin.Write([]byte(story))
+					Ω(err).ShouldNot(HaveOccurred())
+
+					session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+					Ω(err).ShouldNot(HaveOccurred())
+
+					err = stdin.Close()
+					Ω(err).ShouldNot(HaveOccurred())
+					Eventually(session).Should(gexec.Exit(0))
+
+					Ω(session.Err.Contents()).Should(ContainSubstring("There were errors parsing your file"))
+					Ω(session.Err.Contents()).Should(ContainSubstring("Story has more than 8 tasks; consider breaking it into smaller stories:"))
+				})
 			})
 		})
 	})

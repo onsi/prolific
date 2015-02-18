@@ -7,11 +7,21 @@ import (
 	"strings"
 )
 
+var MAX_TASKS = 8
+
 var CSV_HEADERS = []string{
 	"Title",
 	"Type",
 	"Description",
 	"Labels",
+	"Task",
+	"Task",
+	"Task",
+	"Task",
+	"Task",
+	"Task",
+	"Task",
+	"Task",
 }
 
 type Story struct {
@@ -19,6 +29,7 @@ type Story struct {
 	Title       string
 	Description string
 	Labels      []string
+	Tasks       []string
 }
 
 func (s *Story) AppendLine(line string) error {
@@ -30,6 +41,17 @@ func (s *Story) AppendLine(line string) error {
 		}
 		s.Title, s.Type, err = s.ParseTitleLine(line)
 		return err
+	}
+
+	task_regexp := regexp.MustCompile(`^[\*-] \[ \] `)
+	if task_regexp.MatchString(line) {
+		indices := task_regexp.FindStringIndex(line)
+		task := strings.TrimSpace(line[indices[1]:])
+		s.Tasks = append(s.Tasks, task)
+		if len(s.Tasks) > MAX_TASKS {
+			return fmt.Errorf("Story has more than 8 tasks; consider breaking it into smaller stories:\n\t%s\n", s.Title)
+		}
+		return nil
 	}
 
 	if strings.HasPrefix(line, "L: ") {
@@ -76,10 +98,15 @@ func (s *Story) ParseStoryType(line string) (string, error) {
 }
 
 func (s Story) CSVRecords() []string {
-	return []string{
+	csv := []string{
 		s.Title,
 		s.Type,
 		strings.TrimSpace(s.Description),
 		strings.Join(s.Labels, ","),
 	}
+	csv = append(csv, s.Tasks...)
+	for j := len(s.Tasks) ; j < MAX_TASKS ; j++ {
+		csv = append(csv, "")
+	}
+	return csv
 }
