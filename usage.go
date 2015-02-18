@@ -1,12 +1,12 @@
 package main
 
 import (
-    "fmt"
-    "os"
+	"fmt"
+	"os"
 )
 
 func PrintUsageAndExit() {
-    fmt.Println(`prolific v2.0
+	fmt.Println(`prolific v2.718
 
 Usage:
     prolific [FILE]
@@ -52,5 +52,5 @@ Syntax:
         [CHORE]
         [RELEASE]
 `)
-    os.Exit(1)
+	os.Exit(1)
 }
