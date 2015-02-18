@@ -19,7 +19,7 @@ func ConvertAndEmitStoriesFromFile(file string) error {
 }
 
 func ConvertAndEmitStories(content []byte) error {
-	stories, errors := ExtractStories(content)
+	stories, numTasks, errors := ExtractStories(content)
 
 	if len(errors) > 0 {
 		fmt.Fprintln(os.Stderr, "There were errors parsing your file:")
@@ -30,10 +30,15 @@ func ConvertAndEmitStories(content []byte) error {
 
 	w := csv.NewWriter(os.Stdout)
 
-	w.Write(CSV_HEADERS)
+	headers := BASE_CSV_HEADERS
+	for i := 0; i < numTasks; i++ {
+		headers = append(headers, "Task")
+	}
+
+	w.Write(headers)
 
 	for _, story := range stories {
-		w.Write(story.CSVRecords())
+		w.Write(story.CSVRecords(numTasks))
 	}
 
 	w.Flush()
@@ -43,10 +48,12 @@ func ConvertAndEmitStories(content []byte) error {
 
 var EmptyStoryError = errors.New("You have an empty story.")
 
-func ExtractStories(content []byte) ([]Story, []error) {
+func ExtractStories(content []byte) ([]Story, int, []error) {
 	errors := []error{}
 
 	parts := bytes.Split(content, []byte("\n---\n\n"))
+
+	numTasks := 0
 
 	stories := []Story{}
 	for _, part := range parts {
@@ -57,10 +64,13 @@ func ExtractStories(content []byte) ([]Story, []error) {
 			}
 			continue
 		}
+		if len(story.Tasks) > numTasks {
+			numTasks = len(story.Tasks)
+		}
 		stories = append(stories, story)
 	}
 
-	return stories, errors
+	return stories, numTasks, errors
 }
 
 func ExtractStory(part []byte) (Story, error) {

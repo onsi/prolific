@@ -42,9 +42,9 @@ L: mvp
 
 A metabolic endocrinide that the developrs will likely need to photoencapsulate.
 
-- [ ] task 1
-- [ ] task 2
-- [ ] task 3
+- [ ] Re-enfarbulate the mitilandrinide
+- [ ] Masticulate the retracto-mandible
+- [ ] Effervesce all enteropolycarbides
 
 ---
 

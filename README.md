@@ -45,6 +45,10 @@ L: mvp
 
 A metabolic endocrinide that the developrs will likely need to photoencapsulate.
 
+- [ ] Re-enfarbulate the mitilandrinide
+- [ ] Masticulate the retracto-mandible
+- [ ] Effervesce all enteropolycarbides
+
 ---
 
 [RELEASE] Toaster MVP is Ready
