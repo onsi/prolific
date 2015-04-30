@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
@@ -15,6 +15,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
+
+func fixturePath(filename string) (string) {
+	return filepath.Join("fixtures", filename + ".prolific")
+}
 
 var _ = Describe("Prolific", func() {
 	var session *gexec.Session
@@ -155,38 +159,10 @@ var _ = Describe("Prolific", func() {
 		})
 
 		Describe("tasks", func() {
-			var cmd *exec.Cmd
-			var stdin io.WriteCloser
-
-			BeforeEach(func() {
-				cmd = exec.Command(prolific)
-				stdin, err = cmd.StdinPipe()
-				Ω(err).ShouldNot(HaveOccurred())
-			})
-
 			Context("with many tasks", func() {
-				const story = `As a user I can toast a bagel
-
-When I insert a bagel into toaster and press the on button, I should get a toasted bagel
-
-- [ ] task 1
-* [ ] task 2
-- [ ] task 3
-* [ ] task 4
-- [ ] task 5
-- [ ] task 6
-* [ ] task 7
-* [ ] task 8
-* [ ] task 9
-`
 				It("populates all task columns", func() {
-					_, err = stdin.Write([]byte(story))
-					Ω(err).ShouldNot(HaveOccurred())
-
+					cmd := exec.Command(prolific, fixturePath("many-tasks"))
 					session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-					Ω(err).ShouldNot(HaveOccurred())
-
-					err = stdin.Close()
 					Ω(err).ShouldNot(HaveOccurred())
 					Eventually(session).Should(gexec.Exit(0))
 
