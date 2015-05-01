@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
@@ -16,7 +16,12 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+func fixturePath(filename string) (string) {
+	return filepath.Join("fixtures", filename + ".prolific")
+}
+
 var _ = Describe("Prolific", func() {
+	var TITLE, TYPE, DESCRIPTION, LABELS, TASK1 = 0, 1, 2, 3, 4
 	var session *gexec.Session
 	var err error
 
@@ -87,8 +92,6 @@ var _ = Describe("Prolific", func() {
 				By("parsing all entries")
 				Ω(records).Should(HaveLen(7))
 
-				var TITLE, TYPE, DESCRIPTION, LABELS, TASK1 = 0, 1, 2, 3, 4
-
 				By("parsing all relevant fields")
 				Ω(records[1][TITLE]).Should(Equal("As a user I can toast a bagel"))
 				Ω(records[1][TYPE]).Should(Equal("feature"))
@@ -155,38 +158,10 @@ var _ = Describe("Prolific", func() {
 		})
 
 		Describe("tasks", func() {
-			var cmd *exec.Cmd
-			var stdin io.WriteCloser
-
-			BeforeEach(func() {
-				cmd = exec.Command(prolific)
-				stdin, err = cmd.StdinPipe()
-				Ω(err).ShouldNot(HaveOccurred())
-			})
-
 			Context("with many tasks", func() {
-				const story = `As a user I can toast a bagel
-
-When I insert a bagel into toaster and press the on button, I should get a toasted bagel
-
-- [ ] task 1
-* [ ] task 2
-- [ ] task 3
-* [ ] task 4
-- [ ] task 5
-- [ ] task 6
-* [ ] task 7
-* [ ] task 8
-* [ ] task 9
-`
 				It("populates all task columns", func() {
-					_, err = stdin.Write([]byte(story))
-					Ω(err).ShouldNot(HaveOccurred())
-
+					cmd := exec.Command(prolific, fixturePath("many-tasks"))
 					session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
-					Ω(err).ShouldNot(HaveOccurred())
-
-					err = stdin.Close()
 					Ω(err).ShouldNot(HaveOccurred())
 					Eventually(session).Should(gexec.Exit(0))
 
@@ -202,6 +177,24 @@ When I insert a bagel into toaster and press the on button, I should get a toast
 						Ω(records[1][TASK1+j]).Should(Equal(fmt.Sprintf("task %d", j+1)))
 					}
 				})
+			})
+		})
+
+		Describe("liberal separator-handling", func() {
+			It("handles variations on whitespace around record separators", func() {
+				cmd := exec.Command(prolific, fixturePath("liberal-separators"))
+				session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Expect(err).ToNot(HaveOccurred())
+				Eventually(session).Should(gexec.Exit(0))
+
+				reader := csv.NewReader(bytes.NewReader(session.Out.Contents()))
+				records, err := reader.ReadAll()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(records).To(HaveLen(4))
+				Expect(records[1][TITLE]).To(MatchRegexp("Story 1"))
+				Expect(records[2][TITLE]).To(MatchRegexp("Story 2"))
+				Expect(records[3][TITLE]).To(MatchRegexp("Story 3"))
 			})
 		})
 	})
