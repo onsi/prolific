@@ -1,12 +1,13 @@
 package main
 
 import (
-	"bytes"
 	"encoding/csv"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
+	"strings"
 )
 
 func ConvertAndEmitStoriesFromFile(file string) error {
@@ -15,10 +16,10 @@ func ConvertAndEmitStoriesFromFile(file string) error {
 		return fmt.Errorf("Couldn't load file: %s\n%s", file, err.Error())
 	}
 
-	return ConvertAndEmitStories(content)
+	return ConvertAndEmitStories(string(content))
 }
 
-func ConvertAndEmitStories(content []byte) error {
+func ConvertAndEmitStories(content string) error {
 	stories, numTasks, errors := ExtractStories(content)
 
 	if len(errors) > 0 {
@@ -48,10 +49,12 @@ func ConvertAndEmitStories(content []byte) error {
 
 var EmptyStoryError = errors.New("You have an empty story.")
 
-func ExtractStories(content []byte) ([]Story, int, []error) {
+func ExtractStories(content string) ([]Story, int, []error) {
 	errors := []error{}
 
-	parts := bytes.Split(content, []byte("\n---\n\n"))
+	story_separator := regexp.MustCompile(`(?m)(\n\n|\A)---\n\s*`)
+
+	parts := story_separator.Split(content, -1)
 
 	numTasks := 0
 
@@ -73,12 +76,17 @@ func ExtractStories(content []byte) ([]Story, int, []error) {
 	return stories, numTasks, errors
 }
 
-func ExtractStory(part []byte) (Story, error) {
-	lines := bytes.Split(part, []byte("\n"))
-	if len(lines) == 0 {
+func isStoryEmpty(content string) bool {
+	match, _ := regexp.MatchString(`(?m)\A\s*\z`, content)
+	return match
+}
+
+func ExtractStory(part string) (Story, error) {
+	if isStoryEmpty(part) {
 		return Story{}, EmptyStoryError
 	}
 
+	lines := strings.Split(part, "\n")
 	story := &Story{}
 
 	for _, line := range lines {

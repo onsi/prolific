@@ -21,6 +21,7 @@ func fixturePath(filename string) (string) {
 }
 
 var _ = Describe("Prolific", func() {
+	var TITLE, TYPE, DESCRIPTION, LABELS, TASK1 = 0, 1, 2, 3, 4
 	var session *gexec.Session
 	var err error
 
@@ -90,8 +91,6 @@ var _ = Describe("Prolific", func() {
 
 				By("parsing all entries")
 				Ω(records).Should(HaveLen(7))
-
-				var TITLE, TYPE, DESCRIPTION, LABELS, TASK1 = 0, 1, 2, 3, 4
 
 				By("parsing all relevant fields")
 				Ω(records[1][TITLE]).Should(Equal("As a user I can toast a bagel"))
@@ -178,6 +177,24 @@ var _ = Describe("Prolific", func() {
 						Ω(records[1][TASK1+j]).Should(Equal(fmt.Sprintf("task %d", j+1)))
 					}
 				})
+			})
+		})
+
+		Describe("liberal separator-handling", func() {
+			It("handles variations on whitespace around record separators", func() {
+				cmd := exec.Command(prolific, fixturePath("liberal-separators"))
+				session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
+				Expect(err).ToNot(HaveOccurred())
+				Eventually(session).Should(gexec.Exit(0))
+
+				reader := csv.NewReader(bytes.NewReader(session.Out.Contents()))
+				records, err := reader.ReadAll()
+				Expect(err).ToNot(HaveOccurred())
+
+				Expect(records).To(HaveLen(4))
+				Expect(records[1][TITLE]).To(MatchRegexp("Story 1"))
+				Expect(records[2][TITLE]).To(MatchRegexp("Story 2"))
+				Expect(records[3][TITLE]).To(MatchRegexp("Story 3"))
 			})
 		})
 	})

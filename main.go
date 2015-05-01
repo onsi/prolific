@@ -15,7 +15,7 @@ func main() {
 	content := readStdin()
 	if len(os.Args) == 1 && content != nil {
 		fmt.Fprintf(os.Stderr, "Converting STDIN\n")
-		err := ConvertAndEmitStories(content)
+		err := ConvertAndEmitStories(string(content))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed:", err.Error())
 			os.Exit(1)
