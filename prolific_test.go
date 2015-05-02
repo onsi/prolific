@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/onsi/gomega/gbytes"
@@ -16,8 +15,10 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func fixturePath(filename string) (string) {
-	return filepath.Join("fixtures", filename + ".prolific")
+func fixturePath(filename string) string {
+	path, err := filepath.Abs(filepath.Join("fixtures", filename+".prolific"))
+	Ω(err).ShouldNot(HaveOccurred())
+	return path
 }
 
 var _ = Describe("Prolific", func() {
@@ -25,14 +26,10 @@ var _ = Describe("Prolific", func() {
 	var session *gexec.Session
 	var err error
 
-	AfterEach(func() {
-		os.Remove("stories.prolific")
-	})
-
 	Describe("prolific help", func() {
 		Context("given a 'help' argument", func() {
 			It("emits usage information", func() {
-				cmd := exec.Command(prolific, "help")
+				cmd := Command(prolific, "help")
 				session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Ω(err).ShouldNot(HaveOccurred())
 				Eventually(session).Should(gexec.Exit(1))
@@ -42,7 +39,7 @@ var _ = Describe("Prolific", func() {
 
 		Context("given no argument", func() {
 			It("emits usage information", func() {
-				cmd := exec.Command(prolific)
+				cmd := Command(prolific)
 				session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Ω(err).ShouldNot(HaveOccurred())
 				Eventually(session).Should(gexec.Exit(1))
@@ -53,21 +50,21 @@ var _ = Describe("Prolific", func() {
 
 	Describe("prolific template", func() {
 		BeforeEach(func() {
-			cmd := exec.Command(prolific, "template")
+			cmd := Command(prolific, "template")
 			session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Ω(err).ShouldNot(HaveOccurred())
 			Eventually(session).Should(gexec.Exit(0))
 		})
 
 		It("should generate a template file", func() {
-			_, err := os.Stat("stories.prolific")
+			_, err := os.Stat(filepath.Join(workingDir, "stories.prolific"))
 			Ω(err).ShouldNot(HaveOccurred())
 		})
 	})
 
 	Describe("generating csv output", func() {
 		BeforeEach(func() {
-			cmd := exec.Command(prolific, "template")
+			cmd := Command(prolific, "template")
 			session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 			Ω(err).ShouldNot(HaveOccurred())
 			Eventually(session).Should(gexec.Exit(0))
@@ -75,7 +72,7 @@ var _ = Describe("Prolific", func() {
 
 		Describe("reading from file", func() {
 			BeforeEach(func() {
-				cmd := exec.Command(prolific, "stories.prolific")
+				cmd := Command(prolific, "stories.prolific")
 				session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Ω(err).ShouldNot(HaveOccurred())
 				Eventually(session).Should(gexec.Exit(0))
@@ -127,11 +124,11 @@ var _ = Describe("Prolific", func() {
 
 		Describe("reading from stdin", func() {
 			BeforeEach(func() {
-				cmd := exec.Command(prolific)
+				cmd := Command(prolific)
 				stdin, err := cmd.StdinPipe()
 				Ω(err).ShouldNot(HaveOccurred())
 
-				prolific_content, err := ioutil.ReadFile("stories.prolific")
+				prolific_content, err := ioutil.ReadFile(filepath.Join(workingDir, "stories.prolific"))
 				Ω(err).ShouldNot(HaveOccurred())
 				_, err = stdin.Write(prolific_content)
 				Ω(err).ShouldNot(HaveOccurred())
@@ -160,7 +157,7 @@ var _ = Describe("Prolific", func() {
 		Describe("tasks", func() {
 			Context("with many tasks", func() {
 				It("populates all task columns", func() {
-					cmd := exec.Command(prolific, fixturePath("many-tasks"))
+					cmd := Command(prolific, fixturePath("many-tasks"))
 					session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 					Ω(err).ShouldNot(HaveOccurred())
 					Eventually(session).Should(gexec.Exit(0))
@@ -182,7 +179,7 @@ var _ = Describe("Prolific", func() {
 
 		Describe("liberal separator-handling", func() {
 			It("handles variations on whitespace around record separators", func() {
-				cmd := exec.Command(prolific, fixturePath("liberal-separators"))
+				cmd := Command(prolific, fixturePath("liberal-separators"))
 				session, err = gexec.Start(cmd, GinkgoWriter, GinkgoWriter)
 				Expect(err).ToNot(HaveOccurred())
 				Eventually(session).Should(gexec.Exit(0))

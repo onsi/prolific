@@ -1,6 +1,10 @@
 package main_test
 
 import (
+	"io/ioutil"
+	"os"
+	"os/exec"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
@@ -14,6 +18,7 @@ func TestProlific(t *testing.T) {
 }
 
 var prolific string
+var workingDir string
 
 var _ = BeforeSuite(func() {
 	var err error
@@ -21,6 +26,22 @@ var _ = BeforeSuite(func() {
 	Ω(err).ShouldNot(HaveOccurred())
 })
 
+var _ = BeforeEach(func() {
+	var err error
+	workingDir, err = ioutil.TempDir("", "prolific")
+	Ω(err).ShouldNot(HaveOccurred())
+})
+
+var _ = AfterEach(func() {
+	Ω(os.RemoveAll(workingDir)).Should(Succeed())
+})
+
 var _ = AfterSuite(func() {
 	gexec.CleanupBuildArtifacts()
 })
+
+func Command(path string, args ...string) *exec.Cmd {
+	cmd := exec.Command(path, args...)
+	cmd.Dir = workingDir
+	return cmd
+}
