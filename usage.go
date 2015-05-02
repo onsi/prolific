@@ -6,7 +6,7 @@ import (
 )
 
 func PrintUsageAndExit() {
-	fmt.Println(`prolific v2.718
+	fmt.Println(`prolific v2.8
 
 Usage:
     prolific [FILE]
