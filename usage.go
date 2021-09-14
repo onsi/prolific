@@ -50,7 +50,6 @@ Syntax:
         [FEATURE]
         [BUG]
         [CHORE]
-        [RELEASE]
-`)
+        [RELEASE]`)
 	os.Exit(1)
 }

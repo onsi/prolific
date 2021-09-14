@@ -5,8 +5,8 @@ prolific: generate many tracker stories
 */
 
 import (
-	"os"
 	"io/ioutil"
+	"os"
 
 	"fmt"
 )
@@ -17,7 +17,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Converting STDIN\n")
 		err := ConvertAndEmitStories(string(content))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed:", err.Error())
+			fmt.Fprintf(os.Stderr, "Failed: %s", err.Error())
 			os.Exit(1)
 		}
 		os.Exit(0)
@@ -44,7 +44,7 @@ func main() {
 	fmt.Fprintf(os.Stderr, "Converting %s\n", os.Args[1])
 	err := ConvertAndEmitStoriesFromFile(os.Args[1])
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed:", err.Error())
+		fmt.Fprintf(os.Stderr, "Failed: %s", err.Error())
 		os.Exit(1)
 	}
 
@@ -53,7 +53,7 @@ func main() {
 
 func readStdin() []byte {
 	stat, err := os.Stdin.Stat()
-	if err != nil || (stat.Mode() & os.ModeCharDevice) != 0 {
+	if err != nil || (stat.Mode()&os.ModeCharDevice) != 0 {
 		return nil
 	}
 
