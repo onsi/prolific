@@ -52,7 +52,7 @@ var EmptyStoryError = errors.New("You have an empty story.")
 func ExtractStories(content string) ([]Story, int, []error) {
 	errors := []error{}
 
-	story_separator := regexp.MustCompile(`(?m)(\n\n|\A)---\s*\n\s*`)
+	story_separator := regexp.MustCompile(`(?m)(\n\n|\A)----\s*\n\s*`)
 
 	parts := story_separator.Split(content, -1)
 
